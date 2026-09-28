@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRINCE MOVIE — Streaming</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#E50914; --red-dark:#B00610;
+    --bg:#141414; --bg2:#181818; --bg3:#232323;
+    --text:#fff; --text-dim:#b3b3b3; --text-faint:#808080;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',Arial,sans-serif;overflow-x:hidden}
+  img{display:block}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  ::-webkit-scrollbar{width:10px;height:8px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#555;border-radius:5px}
+  ::-webkit-scrollbar-thumb:hover{background:#777}
+
+  /* ============ LOGIN ============ */
+  #login-screen{
+    position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.78)),url('https://assets.nflxext.com/ffe/siteui/vlv3/9d3533b2-0e02-40b2-95d9-afd9abc4b7ae/11393881-3b1c-46a8-8fbd-4a90e96510d4/FR-fr-20240311-popsignuptwoweeks-perspective_alpha_website_small.jpg') center/cover no-repeat;
+  }
+  .login-box{background:rgba(0,0,0,.78);padding:60px 68px;border-radius:6px;width:100%;max-width:450px;backdrop-filter:blur(4px)}
+  .login-box h1{font-size:32px;font-weight:700;margin-bottom:28px}
+  .login-logo{
+    position:absolute;top:22px;left:48px;
+    font-family:'Bebas Neue',sans-serif;font-size:46px;line-height:1;letter-spacing:3px;
+    background:linear-gradient(92deg,#ff1e2d 10%,#ff6a3d 55%,#ffb347 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 30px rgba(229,9,20,.6);transform:skewX(-6deg);
+  }
+  .form-group{margin-bottom:16px}
+  .form-group input{
+    width:100%;padding:16px 20px;border-radius:4px;border:1px solid #555;background:#333;color:#fff;font-size:16px;outline:none;transition:border .2s;
+  }
+  .form-group input:focus{border-color:#fff}
+  .btn-login{width:100%;padding:16px;background:var(--red);color:#fff;font-size:17px;font-weight:600;border-radius:4px;margin-top:16px;transition:background .2s}
+  .btn-login:hover{background:var(--red-dark)}
+  .login-help{display:flex;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text-dim)}
+  .login-help label{display:flex;align-items:center;gap:6px;cursor:pointer}
+  .login-demo{margin-top:28px;padding:14px;background:rgba(255,255,255,.06);border-radius:6px;font-size:13px;color:var(--text-dim);line-height:1.6;text-align:center}
+  .login-demo code{color:#fff;background:#333;padding:2px 8px;border-radius:4px}
+
+  /* ============ NAVBAR ============ */
+  #navbar{
+    position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;gap:36px;
+    padding:0 48px;height:68px;transition:background .35s;
+    background:linear-gradient(180deg,rgba(0,0,0,.75),transparent);
+  }
+  #navbar.solid{background:var(--bg)}
+  .logo{
+    font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;letter-spacing:2px;cursor:pointer;flex-shrink:0;
+    background:linear-gradient(92deg,#ff1e2d 10%,#ff6a3d 55%,#ffb347 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 26px rgba(229,9,20,.55);
+    transform:skewX(-6deg);transition:filter .25s,transform .25s;
+  }
+  .logo:hover{filter:brightness(1.25);transform:skewX(-6deg) scale(1.06)}
+  .nav-links{display:flex;gap:22px;font-size:14px}
+  .nav-links button{color:var(--text-dim);font-size:14px;font-weight:500;transition:color .2s;padding:6px 0}
+  .nav-links button:hover,.nav-links button.active{color:#fff}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:18px}
+  .search-wrap{position:relative;display:flex;align-items:center}
+  .search-wrap input{
+    width:0;opacity:0;background:rgba(0,0,0,.75);border:1px solid #666;color:#fff;padding:8px 14px;
+    border-radius:4px;outline:none;font-size:14px;transition:all .3s;
+  }
+  .search-wrap.open input{width:230px;opacity:1}
+  .icon-btn{font-size:20px;color:#fff;padding:6px;transition:transform .15s}
+  .icon-btn:hover{transform:scale(1.12)}
+  .avatar{width:34px;height:34px;border-radius:6px;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;cursor:pointer}
+
+  /* ============ HERO ============ */
+  #hero{position:relative;height:82vh;min-height:520px;display:flex;align-items:flex-end}
+  #hero-bg{position:absolute;inset:0;background-size:cover;background-position:center 20%;transition:background-image .6s}
+  #hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,20,20,.25) 0%,transparent 40%,rgba(20,20,20,.85) 85%,var(--bg) 100%)}
+  #hero-content{position:relative;z-index:2;padding:0 48px 130px;max-width:760px}
+  #hero-tag{color:var(--red);font-weight:700;letter-spacing:4px;font-size:14px;margin-bottom:12px;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+  #hero-title{font-size:52px;font-weight:900;line-height:1.05;margin-bottom:18px;text-shadow:0 4px 20px rgba(0,0,0,.7)}
+  #hero-meta{display:flex;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;color:#ddd;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+  .badge-v{border:1px solid #ddd;padding:1px 7px;font-size:11px;border-radius:3px}
+  #hero-synopsis{font-size:16px;line-height:1.55;color:#eee;text-shadow:0 1px 4px rgba(0,0,0,.9);margin-bottom:26px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .hero-btns{display:flex;gap:14px}
+  .btn-play{display:flex;align-items:center;gap:10px;background:#fff;color:#000;font-size:17px;font-weight:700;padding:13px 34px;border-radius:5px;transition:background .2s,transform .15s}
+  .btn-play:hover{background:rgba(255,255,255,.75);transform:scale(1.03)}
+  .btn-more{display:flex;align-items:center;gap:10px;background:rgba(109,109,110,.7);color:#fff;font-size:17px;font-weight:600;padding:13px 30px;border-radius:5px;backdrop-filter:blur(4px);transition:background .2s,transform .15s}
+  .btn-more:hover{background:rgba(109,109,110,.45);transform:scale(1.03)}
+
+  /* ============ ROWS ============ */
+  #rows{padding:0 0 40px;margin-top:-110px;position:relative;z-index:3}
+  .row{margin-bottom:14px}
+  .row-header{display:flex;align-items:baseline;gap:14px;padding:0 48px;margin-bottom:10px}
+  .row-title{font-size:20px;font-weight:700}
+  .row-body{position:relative}
+  .row-track{display:flex;gap:8px;overflow-x:auto;scroll-behavior:smooth;padding:8px 48px 18px;scrollbar-width:none}
+  .row-track::-webkit-scrollbar{display:none}
+  .row-arrow{
+    position:absolute;top:0;bottom:18px;width:48px;z-index:5;display:flex;align-items:center;justify-content:center;
+    font-size:38px;color:#fff;background:rgba(20,20,20,.55);opacity:0;transition:opacity .25s;
+  }
+  .row-arrow.left{left:0;border-radius:0 4px 4px 0}
+  .row-arrow.right{right:0;border-radius:4px 0 0 4px}
+  .row-body:hover .row-arrow{opacity:1}
+  .row-arrow:hover{background:rgba(20,20,20,.85);font-size:46px}
+
+  .card{
+    position:relative;flex:0 0 auto;width:225px;height:127px;border-radius:5px;overflow:hidden;
+    cursor:pointer;background:var(--bg3);transition:transform .3s,box-shadow .3s;
+  }
+  .card.tall{width:166px;height:235px}
+  .card img{width:100%;height:100%;object-fit:cover}
+  .card:hover{transform:scale(1.28);z-index:10;box-shadow:0 12px 30px rgba(0,0,0,.7)}
+  .card-overlay{
+    position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;
+    background:linear-gradient(transparent 40%,rgba(0,0,0,.92));opacity:0;transition:opacity .25s;
+  }
+  .card:hover .card-overlay{opacity:1}
+  .card-title{font-size:13px;font-weight:700;line-height:1.25}
+  .card-sub{font-size:11px;color:var(--text-dim);margin-top:4px;display:flex;gap:8px;align-items:center}
+  .tag-type{font-size:9px;font-weight:700;background:rgba(255,255,255,.2);padding:2px 6px;border-radius:3px;text-transform:uppercase}
+
+  /* Skeletons */
+  .skeleton{background:linear-gradient(100deg,#1c1c1c 40%,#2a2a2a 50%,#1c1c1c 60%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:5px}
+  @keyframes shimmer{to{background-position:-200% 0}}
+
+  /* ============ VIEWS ============ */
+  .view{display:none}
+  .view.active{display:block}
+  #view-catalog,#view-search{padding:100px 48px 60px;min-height:100vh}
+  .view-title{font-size:32px;font-weight:800;margin-bottom:28px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px}
+  .grid .card{width:100%;height:260px}
+  .btn-more-grid{display:block;margin:40px auto 0;padding:13px 44px;background:var(--bg3);border:1px solid #444;color:#fff;font-size:15px;font-weight:600;border-radius:5px;transition:background .2s}
+  .btn-more-grid:hover{background:#333}
+  .empty-msg{text-align:center;color:var(--text-dim);padding:80px 0;font-size:17px}
+
+  /* ============ MODALS ============ */
+  .modal-backdrop{
+    position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.72);display:none;
+    align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px);
+  }
+  .modal-backdrop.open{display:flex;animation:fadeIn .25s}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal{
+    background:var(--bg2);border-radius:10px;width:100%;max-width:880px;max-height:92vh;overflow-y:auto;
+    position:relative;animation:slideUp .3s;
+  }
+  @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-close{
+    position:absolute;top:16px;right:16px;z-index:10;width:38px;height:38px;border-radius:50%;
+    background:rgba(0,0,0,.75);color:#fff;font-size:19px;display:flex;align-items:center;justify-content:center;transition:background .2s;
+  }
+  .modal-close:hover{background:var(--red)}
+
+  /* Detail modal */
+  .detail-hero{position:relative;height:340px;background-size:cover;background-position:center 25%}
+  .detail-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 30%,var(--bg2))}
+  .detail-hero-info{position:absolute;bottom:24px;left:40px;z-index:2;right:40px}
+  .detail-hero-info h2{font-size:36px;font-weight:900;text-shadow:0 3px 12px rgba(0,0,0,.8)}
+  .detail-body{padding:24px 40px 40px}
+  .detail-meta{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;color:#46d369;font-weight:600;margin-bottom:6px}
+  .detail-meta .dim{color:var(--text-dim);font-weight:400}
+  .detail-genres{font-size:13px;color:var(--text-dim);margin-bottom:18px}
+  .detail-synopsis{font-size:15px;line-height:1.65;color:#eee;margin-bottom:24px}
+  .btn-lecture{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#000;font-weight:700;font-size:15px;padding:11px 28px;border-radius:5px;margin-bottom:24px;transition:background .2s}
+  .btn-lecture:hover{background:rgba(255,255,255,.75)}
+  .section-label{font-size:18px;font-weight:700;margin:22px 0 12px}
+  .episode-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto;padding-right:6px}
+  .episode-item{
+    display:flex;align-items:center;gap:16px;padding:10px 12px;border-radius:6px;cursor:pointer;transition:background .2s;
+  }
+  .episode-item:hover{background:var(--bg3)}
+  .ep-num{font-size:22px;color:var(--text-faint);width:30px;text-align:center;flex-shrink:0}
+  .ep-info{flex:1;min-width:0}
+  .ep-title{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ep-sub{font-size:12px;color:var(--text-dim);margin-top:2px}
+  .ep-play{color:#fff;font-size:18px;opacity:0;transition:opacity .2s}
+  .episode-item:hover .ep-play{opacity:1}
+  .related-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+  .related-row::-webkit-scrollbar{display:none}
+  .related-row .card{width:140px;height:200px}
+
+  /* Player modal */
+  #player-modal .modal{max-width:1000px;background:#000}
+  .player-top{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:16px;flex-wrap:wrap}
+  .player-top h3{font-size:17px;font-weight:700}
+  .server-list{display:flex;gap:8px;flex-wrap:wrap}
+  .server-btn{
+    padding:8px 16px;border-radius:5px;background:var(--bg3);border:1px solid #444;font-size:13px;font-weight:600;transition:all .2s;
+  }
+  .server-btn:hover{border-color:#fff}
+  .server-btn.active{background:var(--red);border-color:var(--red)}
+  .server-btn .sv-v{font-size:10px;font-weight:700;background:rgba(255,255,255,.25);padding:1px 5px;border-radius:3px;margin-left:6px}
+  #player-frame{width:100%;aspect-ratio:16/9;border:none;background:#000}
+
+  /* Webtoon reader */
+  #view-reader{padding:90px 0 60px;max-width:820px;margin:0 auto}
+  .reader-bar{display:flex;align-items:center;justify-content:space-between;padding:0 20px 20px;gap:12px;flex-wrap:wrap}
+  .reader-bar h2{font-size:20px;font-weight:800}
+  .reader-nav{display:flex;gap:10px}
+  .reader-nav select{background:var(--bg3);color:#fff;border:1px solid #444;padding:9px 14px;border-radius:5px;font-size:14px;outline:none}
+  .reader-nav button{padding:9px 18px;background:var(--red);border-radius:5px;font-weight:600;font-size:14px;transition:background .2s}
+  .reader-nav button:hover{background:var(--red-dark)}
+  .reader-nav button:disabled{background:var(--bg3);color:var(--text-faint);cursor:not-allowed}
+  #reader-pages img{width:100%;display:block;margin:0 auto;background:#000}
+  .reader-loading{text-align:center;padding:60px;color:var(--text-dim)}
+
+  /* Toast */
+  #toast{
+    position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);z-index:1200;
+    background:#fff;color:#000;padding:14px 26px;border-radius:6px;font-weight:600;font-size:14px;
+    transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+  #toast.show{transform:translateX(-50%) translateY(0)}
+
+  footer{padding:50px 48px;color:var(--text-faint);font-size:13px;line-height:1.8;border-top:1px solid #2a2a2a;margin-top:30px}
+
+  @media (max-width:900px){
+    #navbar{padding:0 20px;gap:16px}
+    .nav-links{display:none}
+    #hero-content{padding:0 20px 110px}
+    #hero-title{font-size:34px}
+    .row-header,.row-track{padding-left:20px;padding-right:20px}
+    #view-catalog,#view-search{padding:90px 20px 50px}
+    .login-box{padding:44px 28px}
+    .login-logo{left:20px}
+    .detail-body{padding:20px}
+    .detail-hero-info{left:20px;right:20px}
+    .card:hover{transform:scale(1.12)}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login-screen">
+  <div class="login-logo">PRINCE MOVIE</div>
+  <div class="login-box">
+    <h1>Connexion</h1>
+    <form id="login-form">
+      <div class="form-group"><input type="email" id="login-email" placeholder="Email" required></div>
+      <div class="form-group"><input type="password" id="login-pass" placeholder="Mot de passe" required></div>
+      <button type="submit" class="btn-login">Se connecter</button>
+    </form>
+    <div class="login-help">
+      <label><input type="checkbox" checked> Se souvenir de moi</label>
+      <a href="#" style="color:var(--text-dim);text-decoration:none">Besoin d'aide ?</a>
+    </div>
+    <div class="login-demo">
+      Mode démonstration — utilise n'importe quel email / mot de passe.<br>
+      Exemple : <code>demo@syrixflix.fr</code> / <code>demo123</code>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" style="display:none">
+
+  <nav id="navbar">
+    <div class="logo" onclick="goHome()">PRINCE MOVIE</div>
+    <div class="nav-links">
+      <button class="active" data-nav="home" onclick="goHome()">Accueil</button>
+      <button data-nav="movies" onclick="openCatalog('movie')">Films</button>
+      <button data-nav="series" onclick="openCatalog('series')">Séries</button>
+      <button data-nav="anime" onclick="openCatalog('anime')">Animés</button>
+      <button data-nav="drama" onclick="openCatalog('drama')">K-Dramas</button>
+      <button data-nav="webtoon" onclick="openCatalog('webtoon')">Webtoons</button>
+    </div>
+    <div class="nav-right">
+      <div class="search-wrap" id="search-wrap">
+        <input type="text" id="search-input" placeholder="Titres, genres..." autocomplete="off">
+        <button class="icon-btn" id="search-toggle" title="Rechercher">🔍</button>
+      </div>
+      <div class="avatar" id="avatar" title="Se déconnecter">?</div>
+    </div>
+  </nav>
+
+  <!-- ===== VUE ACCUEIL ===== -->
+  <div class="view active" id="view-home">
+    <section id="hero">
+      <div id="hero-bg"></div>
+      <div id="hero-content">
+        <div id="hero-tag"></div>
+        <h1 id="hero-title"></h1>
+        <div id="hero-meta"></div>
+        <p id="hero-synopsis"></p>
+        <div class="hero-btns">
+          <button class="btn-play" id="hero-play">▶ Lecture</button>
+          <button class="btn-more" id="hero-info">ℹ Plus d'infos</button>
+        </div>
+      </div>
+    </section>
+    <div id="rows"></div>
+  </div>
+
+  <!-- ===== VUE CATALOGUE ===== -->
+  <div class="view" id="view-catalog">
+    <h1 class="view-title" id="catalog-title"></h1>
+    <div class="grid" id="catalog-grid"></div>
+    <button class="btn-more-grid" id="catalog-more" style="display:none">Charger plus</button>
+  </div>
+
+  <!-- ===== VUE RECHERCHE ===== -->
+  <div class="view" id="view-search">
+    <h1 class="view-title" id="search-title">Recherche</h1>
+    <div class="grid" id="search-grid"></div>
+  </div>
+
+  <!-- ===== VUE LECTEUR WEBTOON ===== -->
+  <div class="view" id="view-reader">
+    <div class="reader-bar">
+      <h2 id="reader-title"></h2>
+      <div class="reader-nav">
+        <select id="reader-chapters"></select>
+        <button id="reader-prev">← Précédent</button>
+        <button id="reader-next">Suivant →</button>
+      </div>
+    </div>
+    <div id="reader-pages"></div>
+  </div>
+
+  <footer>
+    PRINCE MOVIE — Interface de démonstration.<br>
+    Les contenus sont fournis par l'API PRINCE MOVIE. Assurez-vous de détenir les droits nécessaires pour la diffusion des contenus sur votre site.
+  </footer>
+</div>
+
+<!-- ================= MODAL DÉTAIL ================= -->
+<div class="modal-backdrop" id="detail-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- ================= MODAL LECTEUR ================= -->
+<div class="modal-backdrop" id="player-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closePlayer()">✕</button>
+    <div class="player-top">
+      <h3 id="player-title">Lecture</h3>
+      <div class="server-list" id="server-list"></div>
+    </div>
+    <iframe id="player-frame" allowfullscreen sandbox="allow-scripts allow-same-origin allow-presentation" referrerpolicy="no-referrer"></iframe>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   PRINCE MOVIE — Client web
+   API : http://51.75.118.170:20041/api/v1 (aucune auth requise)
+============================================================ */
+const BASE = 'http://51.75.118.170:20041/api/v1';
+
+/* ---------- Utilitaires API ---------- */
+async function api(path){
+  try{
+    const res = await fetch(BASE + path);
+    const json = await res.json();
+    if(!json.success) throw new Error(json.error?.message || 'Erreur API');
+    return json;
+  }catch(err){
+    if(err.message && err.message.startsWith('{')) throw new Error('API injoignable');
+    throw err;
+  }
+}
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TYPE_LABEL = {movie:'Film', series:'Série', anime:'Animé', drama:'Drama', webtoon:'Webtoon'};
+const ENDPOINT = {movie:'movies', series:'series', anime:'anime', drama:'dramas', webtoon:'webtoons'};
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ---------- Authentification (démo) ---------- */
+const AUTH_KEY = 'syrixflix_user';
+function isLogged(){ return !!localStorage.getItem(AUTH_KEY); }
+
+document.getElementById('login-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  if(!email) return;
+  localStorage.setItem(AUTH_KEY, email);
+  enterApp();
+});
+
+function enterApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('avatar').textContent = (localStorage.getItem(AUTH_KEY)||'?')[0].toUpperCase();
+  loadHome();
+}
+
+document.getElementById('avatar').addEventListener('click', () => {
+  if(confirm('Se déconnecter ?')){ localStorage.removeItem(AUTH_KEY); location.reload(); }
+});
+
+/* ---------- Navigation / vues ---------- */
+function showView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.toggle('active', b.dataset.nav === name || (name==='home' && b.dataset.nav==='home')));
+  window.scrollTo({top:0});
+}
+function goHome(){ showView('home'); }
+
+/* Navbar scroll */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('solid', window.scrollY > 30);
+});
+
+/* ---------- Composant : carte ---------- */
+function makeCard(item, tall = true){
+  const card = document.createElement('div');
+  card.className = 'card' + (tall ? ' tall' : '');
+  card.innerHTML = `
+    <img loading="lazy" referrerpolicy="no-referrer" src="${esc(item.image)}" alt="${esc(item.title)}"
+         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22450%22><rect fill=%22%23232323%22 width=%22300%22 height=%22450%22/><text x=%22150%22 y=%22225%22 fill=%22%23888%22 font-size=%2216%22 text-anchor=%22middle%22>${esc(item.title).slice(0,18)}</text></svg>'">
+    <div class="card-overlay">
+      <div class="card-title">${esc(item.title)}</div>
+      <div class="card-sub"><span class="tag-type">${TYPE_LABEL[item.type] || esc(item.type)}</span> ${esc(item.version || '')}${item.latest_episode ? ' · ' + esc(item.latest_episode) : ''}${item.latest_chapter ? ' · ' + esc(item.latest_chapter) : ''}</div>
+    </div>`;
+  card.addEventListener('click', () => openDetail(item.type, item.slug));
+  return card;
+}
+
+/* Row avec flèches de défilement */
+function makeRow(title, items, opts = {}){
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `
+    <div class="row-header"><span class="row-title">${esc(title)}</span></div>
+    <div class="row-body">
+      <button class="row-arrow left">‹</button>
+      <div class="row-track"></div>
+      <button class="row-arrow right">›</button>
+    </div>`;
+  const track = row.querySelector('.row-track');
+  items.forEach(it => track.appendChild(makeCard(it, opts.tall !== false)));
+  const scroll = dir => track.scrollBy({left: dir * track.clientWidth * 0.8, behavior:'smooth'});
+  row.querySelector('.left').addEventListener('click', e => {e.stopPropagation(); scroll(-1);});
+  row.querySelector('.right').addEventListener('click', e => {e.stopPropagation(); scroll(1);});
+  return row;
+}
+
+function skeletonRows(container, n = 3){
+  container.innerHTML = '';
+  for(let i=0;i<n;i++){
+    const r = document.createElement('div');
+    r.className = 'row';
+    r.innerHTML = `<div class="row-header"><div class="skeleton" style="height:22px;width:180px"></div></div>
+      <div class="row-track" style="padding:8px 48px">${'<div class="skeleton" style="width:166px;height:235px;flex:0 0 auto"></div>'.repeat(8)}</div>`;
+    container.appendChild(r);
+  }
+}
+
+/* ---------- ACCUEIL ---------- */
+let heroItem = null;
+
+async function loadHome(){
+  const rowsEl = document.getElementById('rows');
+  skeletonRows(rowsEl, 4);
+
+  const calls = [
+    api('/movies?page=1'),
+    api('/series?page=1'),
+    api('/anime?page=1'),
+    api('/dramas?page=1'),
+    api('/webtoons?page=1'),
+  ];
+  const [movies, series, anime, dramas, webtoons] = await Promise.allSettled(calls);
+
+  rowsEl.innerHTML = '';
+  if(movies.status === 'fulfilled' && movies.value.data.length){
+    setHero(movies.value.data);
+    rowsEl.appendChild(makeRow('Films populaires', movies.value.data));
+  }
+  if(series.status === 'fulfilled' && series.value.data.length) rowsEl.appendChild(makeRow('Séries du moment', series.value.data));
+  if(anime.status === 'fulfilled' && anime.value.data.length) rowsEl.appendChild(makeRow('Animés', anime.value.data));
+  if(dramas.status === 'fulfilled' && dramas.value.data.length) rowsEl.appendChild(makeRow('K-Dramas', dramas.value.data));
+  if(webtoons.status === 'fulfilled' && webtoons.value.data.length) rowsEl.appendChild(makeRow('Webtoons', webtoons.value.data));
+
+  const failed = [movies,series,anime,dramas,webtoons].filter(r => r.status==='rejected').length;
+  if(failed) toast('⚠ Certaines sections sont momentanément indisponibles');
+}
+
+function setHero(items){
+  heroItem = items[Math.floor(Math.random() * items.length)];
+  document.getElementById('hero-bg').style.backgroundImage = `url('${esc(heroItem.image)}')`;
+  document.getElementById('hero-tag').textContent = 'PRINCE MOVIE ORIGINAL';
+  document.getElementById('hero-title').textContent = heroItem.title;
+  document.getElementById('hero-meta').innerHTML =
+    `<span style="color:#46d369;font-weight:700">97 % compatible</span>
+     <span class="badge-v">${esc(heroItem.version || '')}</span>
+     <span>${TYPE_LABEL[heroItem.type] || ''}</span>`;
+  document.getElementById('hero-synopsis').textContent = 'Regardez « ' + heroItem.title + ' » en streaming VF / VOSTFR en haute qualité sur PRINCE MOVIE.';
+  document.getElementById('hero-play').onclick = () => openDetail(heroItem.type, heroItem.slug);
+  document.getElementById('hero-info').onclick = () => openDetail(heroItem.type, heroItem.slug);
+}
+
+/* ---------- CATALOGUE + pagination ---------- */
+const catalog = { type:null, page:1, lastPage:1, loading:false };
+
+async function openCatalog(type){
+  catalog.type = type; catalog.page = 1;
+  showView('catalog');
+  document.getElementById('catalog-title').textContent = {movie:'Films', series:'Séries', anime:'Animés', drama:'K-Dramas', webtoon:'Webtoons'}[type];
+  const grid = document.getElementById('catalog-grid');
+  grid.innerHTML = '<div class="skeleton" style="height:260px;grid-column:1/-1"></div>'.repeat(4);
+  try{
+    const sort = (type==='anime' || type==='drama') ? '&sort=latest' : '';
+    const res = await api(`/${ENDPOINT[type]}?page=1${sort}`);
+    catalog.lastPage = res.meta?.last_page || 1;
+    grid.innerHTML = '';
+    res.data.forEach(it => grid.appendChild(makeCard({...it, type: it.type && it.type!=='movie'&&it.type!=='series' ? it.type : type})));
+    updateCatalogMore();
+  }catch(err){
+    grid.innerHTML = '<p class="empty-msg">Impossible de charger le catalogue. Réessayez dans un instant.</p>';
+  }
+}
+function updateCatalogMore(){
+  const btn = document.getElementById('catalog-more');
+  btn.style.display = catalog.page < catalog.lastPage ? 'block' : 'none';
+}
+document.getElementById('catalog-more').addEventListener('click', async () => {
+  if(catalog.loading || catalog.page >= catalog.lastPage) return;
+  catalog.loading = true;
+  catalog.page++;
+  try{
+    const sort = (catalog.type==='anime' || catalog.type==='drama') ? '&sort=latest' : '';
+    const res = await api(`/${ENDPOINT[catalog.type]}?page=${catalog.page}${sort}`);
+    res.data.forEach(it => document.getElementById('catalog-grid').appendChild(makeCard({...it, type: it.type && it.type!=='movie'&&it.type!=='series' ? it.type : catalog.type})));
+  }catch(e){ toast('Erreur de chargement'); catalog.page--; }
+  catalog.loading = false;
+  updateCatalogMore();
+});
+
+/* ---------- RECHERCHE ---------- */
+const searchWrap = document.getElementById('search-wrap');
+const searchInput = document.getElementById('search-input');
+document.getElementById('search-toggle').addEventListener('click', () => {
+  searchWrap.classList.toggle('open');
+  if(searchWrap.classList.contains('open')) searchInput.focus();
+  else { searchInput.value=''; goHome(); }
+});
+let searchTimer = null;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  const q = searchInput.value.trim();
+  if(q.length < 2){ if(q.length===0) goHome(); return; }
+  searchTimer = setTimeout(() => doSearch(q), 450);
+});
+async function doSearch(q){
+  showView('search');
+  document.getElementById('search-title').textContent = `Résultats pour « ${q} »`;
+  const grid = document.getElementById('search-grid');
+  grid.innerHTML = '<div class="skeleton" style="height:260px;grid-column:1/-1"></div>'.repeat(3);
+  try{
+    const res = await api(`/search?q=${encodeURIComponent(q)}`);
+    grid.innerHTML = '';
+    if(!res.data.length){ grid.innerHTML = '<p class="empty-msg">Aucun résultat trouvé.</p>'; return; }
+    res.data.forEach(it => grid.appendChild(makeCard(it)));
+  }catch(err){
+    grid.innerHTML = '<p class="empty-msg">La recherche a échoué. Réessayez.</p>';
+  }
+}
+
+/* ---------- DÉTAIL (modal) ---------- */
+async function openDetail(type, slug){
+  const modal = document.getElementById('detail-modal');
+  const content = document.getElementById('detail-content');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  content.innerHTML = '<div style="padding:60px;display:flex;justify-content:center"><div class="skeleton" style="width:100%;height:400px"></div></div>';
+
+  const pathType = (type === 'drama') ? 'drama' : type;
+  try{
+    const res = await api(`/${ENDPOINT[pathType]}/${encodeURIComponent(slug)}`);
+    renderDetail(type, res.data);
+  }catch(err){
+    // Gérer wrong_type : l'API renvoie parfois le vrai type
+    const alt = type === 'movie' ? 'series' : (type === 'series' ? 'movie' : type);
+    try{
+      const res2 = await api(`/${ENDPOINT[alt]}/${encodeURIComponent(slug)}`);
+      renderDetail(res2.data.type || alt, res2.data);
+    }catch(e2){
+      content.innerHTML = `<div style="padding:60px;text-align:center;color:var(--text-dim)">Contenu introuvable.<br><small>${esc(e2.message)}</small></div>`;
+    }
+  }
+}
+
+function renderDetail(type, d){
+  const content = document.getElementById('detail-content');
+  const eps = d.episodes || [];
+  const chapters = d.chapters || [];
+  const related = d.related || [];
+
+  let actions = '';
+  if(type === 'webtoon'){
+    actions = `<button class="btn-lecture" id="d-read">📖 Lire le premier chapitre</button>`;
+  } else if(type === 'movie'){
+    actions = `<button class="btn-lecture" id="d-play">▶ Lecture</button>`;
+  }
+
+  content.innerHTML = `
+    <div class="detail-hero" style="background-image:url('${esc(d.image)}')">
+      <div class="detail-hero-info"><h2>${esc(d.title)}</h2></div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-meta">
+        <span>${esc(d.year || '')}</span>
+        ${d.status ? `<span class="dim">${esc(d.status)}</span>` : ''}
+        <span class="badge-v" style="border-color:#666;color:#ddd">${esc(d.version || '')}</span>
+        <span class="dim">${TYPE_LABEL[type] || esc(type)}</span>
+      </div>
+      <div class="detail-genres">${(d.genres || []).map(esc).join(' · ')}${d.country ? ' · ' + esc(d.country) : ''}</div>
+      ${actions}
+      ${d.synopsis ? `<p class="detail-synopsis">${esc(d.synopsis)}</p>` : ''}
+
+      ${type === 'series' && eps.length ? `
+        <div class="section-label">Épisodes <span style="color:var(--text-faint);font-weight:400;font-size:14px">(${eps.length})</span></div>
+        <div class="episode-list">${eps.map(ep => `
+          <div class="episode-item" data-ep="${esc(ep.episode_id)}">
+            <span class="ep-num">${esc(ep.number)}</span>
+            <div class="ep-info">
+              <div class="ep-title">${esc(ep.title || ('Épisode ' + ep.number))}</div>
+              <div class="ep-sub">Saison ${esc(ep.season || '1')} · Épisode ${esc(ep.number)}</div>
+            </div>
+            <span class="ep-play">▶</span>
+          </div>`).join('')}
+        </div>` : ''}
+
+      ${(type === 'anime' || type === 'drama') && eps.length ? `
+        <div class="section-label">Épisodes <span style="color:var(--text-faint);font-weight:400;font-size:14px">(${eps.length})</span></div>
+        <div class="episode-list">${eps.map(ep => `
+          <div class="episode-item" data-ep="${esc(ep.episode_id)}" data-ver="${esc(ep.version || '')}">
+            <span class="ep-num">${esc(ep.number)}</span>
+            <div class="ep-info">
+              <div class="ep-title">${esc(ep.title || ('Épisode ' + ep.number))}</div>
+              <div class="ep-sub">${esc(ep.version || d.version || '')}</div>
+            </div>
+            <span class="ep-play">▶</span>
+          </div>`).join('')}
+        </div>` : ''}
+
+      ${type === 'webtoon' && chapters.length ? `
+        <div class="section-label">Chapitres <span style="color:var(--text-faint);font-weight:400;font-size:14px">(${chapters.length})</span></div>
+        <div class="episode-list" style="max-height:280px">${chapters.slice().reverse().map(ch => `
+          <div class="episode-item" data-ch="${esc(ch.chapter_id)}">
+            <span class="ep-num">📄</span>
+            <div class="ep-info"><div class="ep-title">${esc(ch.title || ('Chapitre ' + ch.number))}</div></div>
+          </div>`).join('')}
+        </div>` : ''}
+
+      ${related.length ? `
+        <div class="section-label">Titres similaires</div>
+        <div class="related-row" id="d-related"></div>` : ''}
+    </div>`;
+
+  // Bouton lecture (film)
+  const playBtn = document.getElementById('d-play');
+  if(playBtn) playBtn.addEventListener('click', () => loadServersAndPlay(`episodes/${encodeURIComponent(d.first_episode_id)}/servers`, d.title));
+
+  // Bouton lire webtoon
+  const readBtn = document.getElementById('d-read');
+  if(readBtn) readBtn.addEventListener('click', () => { closeModal('detail-modal'); openReader(d.slug, d.title, d.chapters, d.first_chapter_id); });
+
+  // Épisodes (séries)
+  content.querySelectorAll('.episode-item[data-ep]').forEach(el => {
+    el.addEventListener('click', () => {
+      const epId = el.dataset.ep;
+      const epTitle = d.title + ' — ' + (el.querySelector('.ep-title')?.textContent || '');
+      if(type === 'series' || type === 'movie'){
+        loadServersAndPlay(`episodes/${encodeURIComponent(epId)}/servers`, epTitle);
+      }else{
+        loadServersAndPlay(`${ENDPOINT[type]}/${encodeURIComponent(d.slug)}/servers?episode=${encodeURIComponent(epId)}`, epTitle);
+      }
+    });
+  });
+
+  // Chapitres webtoon
+  content.querySelectorAll('.episode-item[data-ch]').forEach(el => {
+    el.addEventListener('click', () => { closeModal('detail-modal'); openReader(d.slug, d.title, d.chapters, el.dataset.ch); });
+  });
+
+  // Related
+  const relRow = document.getElementById('d-related');
+  if(relRow) related.forEach(r => relRow.appendChild(makeCard(r)));
+}
+
+/* ---------- LECTEUR (iframe) ---------- */
+async function loadServersAndPlay(path, title){
+  document.getElementById('player-title').textContent = title;
+  const listEl = document.getElementById('server-list');
+  const frame = document.getElementById('player-frame');
+  listEl.innerHTML = '<span style="color:var(--text-dim);font-size:13px">Chargement des serveurs…</span>';
+  frame.src = '';
+  document.getElementById('player-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  try{
+    const res = await api('/' + path);
+    if(!res.data.length){
+      listEl.innerHTML = '<span style="color:var(--text-dim);font-size:13px">Aucun serveur disponible pour le moment.</span>';
+      return;
+    }
+    listEl.innerHTML = '';
+    res.data.forEach((sv, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'server-btn' + (i === 0 ? ' active' : '');
+      btn.innerHTML = `${esc(sv.server_name)}<span class="sv-v">${esc(sv.version || '')}</span>`;
+      btn.addEventListener('click', () => {
+        listEl.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        frame.src = sv.server_link;
+      });
+      listEl.appendChild(btn);
+    });
+    frame.src = res.data[0].server_link;
+  }catch(err){
+    listEl.innerHTML = '<span style="color:#ff6b6b;font-size:13px">Impossible de charger les serveurs. Réessayez.</span>';
+  }
+}
+function closePlayer(){
+  document.getElementById('player-frame').src = '';
+  closeModal('player-modal');
+}
+
+/* ---------- LECTEUR WEBTOON ---------- */
+const reader = { slug:null, title:null, chapters:[], index:0 };
+
+function openReader(slug, title, chapters, firstId){
+  reader.slug = slug; reader.title = title;
+  reader.chapters = chapters || [];
+  let idx = reader.chapters.findIndex(c => String(c.chapter_id) === String(firstId));
+  if(idx < 0) idx = reader.chapters.length - 1; // dernier chapitre par défaut
+  reader.index = idx;
+  showView('reader');
+  renderReaderChapter();
+  buildChapterSelect();
+}
+function buildChapterSelect(){
+  const sel = document.getElementById('reader-chapters');
+  sel.innerHTML = reader.chapters.map((c,i) =>
+    `<option value="${i}">${esc(c.title || ('Chapitre ' + c.number))}</option>`).join('');
+  sel.value = reader.index;
+  sel.onchange = () => { reader.index = +sel.value; renderReaderChapter(); };
+}
+async function renderReaderChapter(){
+  const ch = reader.chapters[reader.index];
+  if(!ch) return;
+  document.getElementById('reader-title').textContent = reader.title + ' — ' + (ch.title || ('Chapitre ' + ch.number));
+  document.getElementById('reader-chapters').value = reader.index;
+  const box = document.getElementById('reader-pages');
+  box.innerHTML = '<p class="reader-loading">Chargement du chapitre…</p>';
+  document.getElementById('reader-prev').disabled = reader.index <= 0;
+  document.getElementById('reader-next').disabled = reader.index >= reader.chapters.length - 1;
+  try{
+    const res = await api(`/webtoons/${encodeURIComponent(reader.slug)}/pages?chapter=${encodeURIComponent(ch.chapter_id)}`);
+    box.innerHTML = res.data.map(p =>
+      `<img loading="lazy" referrerpolicy="no-referrer" src="${esc(p.image)}" onerror="this.style.display='none'" alt="Page ${p.page}">`).join('');
+    window.scrollTo({top:0});
+  }catch(err){
+    box.innerHTML = '<p class="reader-loading">Impossible de charger ce chapitre. Réessayez.</p>';
+  }
+}
+document.getElementById('reader-prev').addEventListener('click', () => { if(reader.index > 0){ reader.index--; renderReaderChapter(); }});
+document.getElementById('reader-next').addEventListener('click', () => { if(reader.index < reader.chapters.length - 1){ reader.index++; renderReaderChapter(); }});
+
+/* ---------- Fermeture modals ---------- */
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if(e.target === m){ if(m.id === 'player-modal') closePlayer(); else closeModal(m.id); } });
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closePlayer(); closeModal('detail-modal'); }
+});
+
+/* ---------- Démarrage ---------- */
+if(isLogged()) enterApp();
+</script>
+</body>
+</html>
